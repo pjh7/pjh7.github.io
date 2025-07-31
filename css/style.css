@@ -4,12 +4,46 @@
 * Author URI: https://untree.co/
 * License: https://creativecommons.org/licenses/by/3.0/
 */
+/* Adjust the padding for the first content section to clear the fixed header and lines */
+.untree_co-section:first-of-type {
+  padding-top: 150px; /* Or more, depending on your desired spacing.
+                        Experiment with this value. */
+}
+
+/* You might also want to ensure the lines-wrap doesn't completely obscure content */
+.lines-wrap {
+    z-index: 0; /* Ensure it's behind your content.
+                   Your .site-nav has z-index: 99, which is good. */
+}
+
+/* Ensure tables have some basic styling */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Ensures borders look clean if added */
+  margin-bottom: 20px; /* Add some space below tables */
+}
+
+/* Add padding to table header and data cells */
+table th,
+table td {
+  padding: 10px 15px; /* Adjust these values for more/less space */
+  border: 1px solid #eee; /* A very light border for separation */
+  text-align: left;
+}
+
+/* Style for the table header */
+table thead th {
+  background-color: #f8f8f8; /* A light background for headers */
+  font-weight: bold;
+}
+
 body {
   font-family: "PT Mono", monospace;
   line-height: 1.6;
   background: #ffffff;
   overflow-x: hidden;
-  font-size: 16px; }
+  font-size: 16px; 
+  position: relative; }
   body:before {
     content: "";
     position: fixed;
@@ -1669,6 +1703,3 @@ figure.dotted-bg {
       .site-footer .social li a:hover {
         background: #36a1ff;
         color: #ffffff; }
-table {
-  border-spacing: 30px;
-}
