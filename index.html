@@ -60,6 +60,7 @@
           <li><a href="#portfolio-section" class="nav-link">Educations</a></li>
           <li><a href="#skill-section" class="nav-link">Skills</a></li>
           <li><a href="#pub-section" class="nav-link">Publications</a></li>
+          <li><a href="#music-section" class="nav-link">Music Recommendations</a></li>
         </ul>
 
         <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-inline-block" data-toggle="collapse" data-target="#main-navbar">
@@ -178,6 +179,19 @@
       </div>
     </div>
 
+    <div class="untree_co-section pb-0" id="music-section">
+      <div class="container">
+        <h1 class="heading gsap-reveal-hero mb-3"><strong>Music Recommendations</strong></h1>
+        <h2 class="subheading gsap-reveal-hero mb-4">
+          <div class="col-md-12">
+            <div class="music-grid" id="musicGrid">
+              <!-- Album covers will be dynamically loaded and arranged here -->
+            </div>
+          </div>
+        </h2>
+      </div>
+    </div>
+
 
     <div id="overlayer"></div>
     <div class="loader">
@@ -205,6 +219,132 @@
 
 
     <script src="js/custom.js"></script>
+    
+    <script>
+      // Music Recommendations functionality
+      $(document).ready(function() {
+        // Sample album data - you can modify this with your actual albums
+        const albums = [
+          {
+            image: 'images/album/Casiopea.png',
+            title: 'Casiopea - Casiopea',
+            description: '4.9'
+          },
+          {
+            image: 'images/album/hifianatomia.jpg',
+            title: 'Soutaiseiriron - Hi-fi Anatomia',
+            description: '4.7, but my fav'
+          },
+          {
+            image: 'images/album/In_Colour.png',
+            title: 'Jamie xx - In Colour',
+            description: '4.8, House music'
+          },
+          {
+            image: 'images/album/Wavejobim.jpg',
+            title: 'Antônio Carlos Jobim - Wave',
+            description: '5.3, Jazz'
+          },
+        ];
+
+        // Function to calculate average RGB color from an image
+        function getAverageColor(imageElement) {
+          return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = imageElement.naturalWidth;
+            canvas.height = imageElement.naturalHeight;
+            
+            ctx.drawImage(imageElement, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let r = 0, g = 0, b = 0, count = 0;
+            
+            for (let i = 0; i < imageData.length; i += 4) {
+              r += imageData[i];
+              g += imageData[i + 1];
+              b += imageData[i + 2];
+              count++;
+            }
+            
+            resolve({
+              r: Math.round(r / count),
+              g: Math.round(g / count),
+              b: Math.round(b / count)
+            });
+          });
+        }
+
+        // Function to calculate color distance (for sorting)
+        function getColorDistance(color1, color2) {
+          return Math.sqrt(
+            Math.pow(color1.r - color2.r, 2) +
+            Math.pow(color1.g - color2.g, 2) +
+            Math.pow(color1.b - color2.b, 2)
+          );
+        }
+
+        // Function to create album grid
+        async function createAlbumGrid() {
+          const musicGrid = $('#musicGrid');
+          
+          // Create album items
+          const albumPromises = albums.map(async (album, index) => {
+            const albumItem = $(`
+              <div class="album-item" data-index="${index}">
+                <img src="${album.image}" alt="${album.title}" onerror="this.src='images/album/placeholder.jpg'">
+                <div class="album-overlay">
+                  <div class="album-info">
+                    <div class="album-title">${album.title}</div>
+                    <div class="album-description">${album.description}</div>
+                  </div>
+                </div>
+              </div>
+            `);
+            
+            return { element: albumItem, album: album, index: index };
+          });
+
+          const albumItems = await Promise.all(albumPromises);
+          
+          // Calculate average colors and sort by color similarity
+          const colorPromises = albumItems.map(async (item) => {
+            const img = item.element.find('img')[0];
+            if (img.complete) {
+              const color = await getAverageColor(img);
+              return { ...item, color: color };
+            } else {
+              return new Promise((resolve) => {
+                img.onload = async () => {
+                  const color = await getAverageColor(img);
+                  resolve({ ...item, color: color });
+                };
+                img.onerror = () => {
+                  resolve({ ...item, color: { r: 128, g: 128, b: 128 } });
+                };
+              });
+            }
+          });
+
+          const albumsWithColors = await Promise.all(colorPromises);
+          
+          // Sort albums by color similarity (simple RGB sorting)
+          albumsWithColors.sort((a, b) => {
+            const aValue = a.color.r * 0.299 + a.color.g * 0.587 + a.color.b * 0.114; // luminance
+            const bValue = b.color.r * 0.299 + b.color.g * 0.587 + b.color.b * 0.114;
+            return aValue - bValue;
+          });
+
+          // Add sorted albums to grid
+          albumsWithColors.forEach(item => {
+            musicGrid.append(item.element);
+          });
+        }
+
+        // Initialize album grid when page loads
+        createAlbumGrid();
+      });
+    </script>
     
   </body>
 
