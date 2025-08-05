@@ -184,8 +184,12 @@
         <h1 class="heading gsap-reveal-hero mb-3"><strong>Music Recommendations</strong></h1>
         <h2 class="subheading gsap-reveal-hero mb-4">
           <div class="col-md-12">
+            <div class="grid-controls mb-4">
+              <label for="gridSizeSlider" class="grid-size-label">Grid Size: <span id="gridSizeValue">5</span> × <span id="gridSizeValue2">5</span></label>
+              <input type="range" id="gridSizeSlider" min="1" max="20" value="5" class="grid-size-slider">
+            </div>
             <div class="music-grid" id="musicGrid">
-              <!-- Album covers will be dynamically loaded and arranged here -->
+              <p> I'm not a music expert, but I'll recommend some albums that I like. </p><!-- Album covers will be dynamically loaded and arranged here -->
             </div>
           </div>
         </h2>
@@ -284,9 +288,34 @@
           );
         }
 
-        // Function to create album grid
-        async function createAlbumGrid() {
+
+
+        // Initialize album grid when page loads
+        createAlbumGrid();
+
+        // Handle grid size slider
+        $('#gridSizeSlider').on('input', function() {
+          const gridSize = parseInt($(this).val());
+          $('#gridSizeValue, #gridSizeValue2').text(gridSize);
+          updateGridLayout(gridSize);
+        });
+
+        // Function to update grid layout
+        function updateGridLayout(gridSize) {
           const musicGrid = $('#musicGrid');
+          musicGrid.css('grid-template-columns', `repeat(${gridSize}, 1fr)`);
+          
+          // Clear existing content except the intro text
+          musicGrid.find('.album-item, .empty-grid-cell').remove();
+          
+          // Recreate the grid with new size
+          createAlbumGrid(gridSize);
+        }
+
+        // Update createAlbumGrid function to accept gridSize parameter
+        async function createAlbumGrid(gridSize = 5) {
+          const musicGrid = $('#musicGrid');
+          const totalCells = gridSize * gridSize;
           
           // Create album items
           const albumPromises = albums.map(async (album, index) => {
@@ -339,10 +368,14 @@
           albumsWithColors.forEach(item => {
             musicGrid.append(item.element);
           });
-        }
 
-        // Initialize album grid when page loads
-        createAlbumGrid();
+          // Fill remaining cells with empty placeholders
+          const remainingCells = totalCells - albumsWithColors.length;
+          for (let i = 0; i < remainingCells; i++) {
+            const emptyCell = $(`<div class="empty-grid-cell">Empty</div>`);
+            musicGrid.append(emptyCell);
+          }
+        }
       });
     </script>
     
