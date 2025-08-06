@@ -1758,7 +1758,7 @@ figure.dotted-bg {
 
 .music-grid {
   display: grid;
-  gap: 20px;
+  gap: 2px;
   max-width: 800px;
   margin: 0 auto;
   padding: 20px 0;
@@ -1838,10 +1838,76 @@ figure.dotted-bg {
   font-family: "PT Mono", monospace;
 }
 
+/* Album Popup Modal */
+.album-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.album-popup.show {
+  display: flex;
+}
+
+.album-popup-content {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.album-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s ease;
+}
+
+.album-popup-close:hover {
+  color: #000;
+}
+
+.album-popup-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.album-popup-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  color: #000;
+  margin-bottom: 15px;
+}
+
+.album-popup-description {
+  font-family: "PT Mono", monospace;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .music-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
+    gap: 2px;
   }
   
   .album-overlay {

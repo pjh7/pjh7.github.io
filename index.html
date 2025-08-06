@@ -192,6 +192,16 @@
             <div class="music-grid" id="musicGrid">
               <!-- Album covers will be dynamically loaded and arranged here -->
             </div>
+            
+            <!-- Album Popup Modal -->
+            <div class="album-popup" id="albumPopup">
+              <div class="album-popup-content">
+                <span class="album-popup-close" id="albumPopupClose">&times;</span>
+                <img class="album-popup-image" id="albumPopupImage" src="" alt="">
+                <div class="album-popup-title" id="albumPopupTitle"></div>
+                <div class="album-popup-description" id="albumPopupDescription"></div>
+              </div>
+            </div>
           </div>
         </h2>
       </div>
@@ -228,29 +238,89 @@
     <script>
       // Music Recommendations functionality
       $(document).ready(function() {
-        // Sample album data - you can modify this with your actual albums
-        const albums = [
-          {
-            image: 'images/albums/Casiopea.png',
-            title: 'Casiopea - Casiopea',
-            description: '4.9'
-          },
-          {
-            image: 'images/albums/hifianatomia.jpg',
-            title: 'Soutaiseiriron - Hi-fi Anatomia',
-            description: '4.7, but my fav'
-          },
-          {
-            image: 'images/albums/In_Colour.png',
-            title: 'Jamie xx - In Colour',
-            description: '4.8, House music'
-          },
-          {
-            image: 'images/albums/Wavejobim.jpg',
-            title: 'Antônio Carlos Jobim - Wave',
-            description: '5.3, Jazz'
-          },
-        ];
+        let albums = [];
+
+        // Function to parse CSV data
+        function parseCSV(csvText) {
+          const lines = csvText.trim().split('\n');
+          const headers = lines[0].split(',').map(header => header.trim());
+          
+          return lines.slice(1).map(line => {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              if (char === '"' && (i === 0 || line[i-1] === ',')) {
+                inQuotes = true;
+              } else if (char === '"' && inQuotes && (i === line.length - 1 || line[i+1] === ',')) {
+                inQuotes = false;
+              } else if (char === ',' && !inQuotes) {
+                values.push(current.trim());
+                current = '';
+              } else {
+                current += char;
+              }
+            }
+            values.push(current.trim());
+            
+            const album = {};
+            headers.forEach((header, index) => {
+              album[header] = values[index] || '';
+            });
+            
+            return album;
+          });
+        }
+
+        // Function to load albums from CSV
+        async function loadAlbumsFromCSV() {
+          try {
+            const response = await fetch('albums.csv');
+            if (!response.ok) {
+              throw new Error('CSV file not found');
+            }
+            const csvText = await response.text();
+            albums = parseCSV(csvText);
+            
+            // Transform CSV data to match expected format
+            albums = albums.map(album => ({
+              image: album.image.startsWith('images/') ? album.image : `images/albums/${album.image}`,
+              title: `${album.artist} - ${album.title}`,
+              description: `${album.score} - ${album.description}`
+            }));
+            
+            // Initialize grid after loading data
+            createAlbumGrid();
+          } catch (error) {
+            console.error('Error loading albums CSV:', error);
+            // Fallback to default albums if CSV fails
+            albums = [
+              {
+                image: 'images/albums/Casiopea.png',
+                title: 'Casiopea - Casiopea',
+                description: '4.9'
+              },
+              {
+                image: 'images/albums/hifianatomia.jpg',
+                title: 'Soutaiseiriron - Hi-fi Anatomia',
+                description: '4.7, but my fav'
+              },
+              {
+                image: 'images/albums/In_Colour.png',
+                title: 'Jamie xx - In Colour',
+                description: '4.8, House music'
+              },
+              {
+                image: 'images/albums/Wavejobim.jpg',
+                title: 'Antônio Carlos Jobim - Wave',
+                description: '5.3, Jazz'
+              }
+            ];
+            createAlbumGrid();
+          }
+        }
 
         // Function to calculate average RGB color from an image
         function getAverageColor(imageElement) {
@@ -292,7 +362,7 @@
 
 
         // Initialize album grid when page loads
-        createAlbumGrid();
+        loadAlbumsFromCSV();
 
         // Handle grid size slider
         $('#gridSizeSlider').on('input', function() {
@@ -332,7 +402,7 @@
           // Create album items
           const albumPromises = selectedAlbums.map(async (album, index) => {
             const albumItem = $(`
-              <div class="album-item" data-index="${index}">
+              <div class="album-item" data-index="${index}" data-album='${JSON.stringify(album)}'>
                 <img src="${album.image}" alt="${album.title}" onerror="this.src='images/albums/placeholder.jpg'">
                 <div class="album-overlay">
                   <div class="album-info">
@@ -387,7 +457,42 @@
             const emptyCell = $(`<div class="empty-grid-cell">Empty</div>`);
             musicGrid.append(emptyCell);
           }
+
+          // Add click handlers for album items with size detection
+          setTimeout(() => {
+            $('.album-item').off('click').on('click', function() {
+              const albumData = JSON.parse($(this).attr('data-album'));
+              const albumSize = $(this).width();
+              
+              // If album is too small (less than 120px), show popup
+              if (albumSize < 120) {
+                showAlbumPopup(albumData);
+              }
+            });
+          }, 100);
         }
+
+        // Function to show album popup
+        function showAlbumPopup(album) {
+          $('#albumPopupImage').attr('src', album.image);
+          $('#albumPopupTitle').text(album.title);
+          $('#albumPopupDescription').text(album.description);
+          $('#albumPopup').addClass('show');
+        }
+
+        // Popup close functionality
+        $('#albumPopupClose, #albumPopup').on('click', function(e) {
+          if (e.target === this) {
+            $('#albumPopup').removeClass('show');
+          }
+        });
+
+        // Close popup with escape key
+        $(document).on('keydown', function(e) {
+          if (e.key === 'Escape') {
+            $('#albumPopup').removeClass('show');
+          }
+        });
       });
     </script>
     
