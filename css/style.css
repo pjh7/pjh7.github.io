@@ -1705,6 +1705,14 @@ figure.dotted-bg {
         color: #ffffff; }
 
 /* Music Recommendations Grid */
+.music-intro {
+  text-align: center;
+  font-family: "PT Mono", monospace;
+  color: #dddde6;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
 .grid-controls {
   text-align: center;
   margin-bottom: 30px;
