@@ -80,7 +80,7 @@
         <div class="col-md-9">
           <h1 class="heading gsap-reveal-hero mb-3"><strong>Junhyung Park</strong></h1>
           <h2 class="subheading gsap-reveal-hero mb-4">
-            Undergraduate student of Department of Mathematicical Science, KAIST <br>MIR researcher
+            Undergraduate student of Department of Mathematical Science, KAIST <br>MIR researcher
           </h2>
           <p class="gsap-reveal-hero"><a href="CV.pdf" target="_blank" class="btn btn-outline-black">CV</a></p>    
         </div>
@@ -453,11 +453,17 @@
 
           const albumsWithColors = await Promise.all(colorPromises);
           
-          // Sort albums by color similarity (simple RGB sorting)
+          // Sort albums to create a 2D RGB gradient
+          // Sort primarily by Green (top to bottom), secondarily by Red (left to right)
           albumsWithColors.sort((a, b) => {
-            const aValue = a.color.r * 0.299 + a.color.g * 0.587 + a.color.b * 0.114; // luminance
-            const bValue = b.color.r * 0.299 + b.color.g * 0.587 + b.color.b * 0.114;
-            return aValue - bValue;
+            const gDiff = a.color.g - b.color.g;
+            if (gDiff !== 0) return gDiff;
+            
+            const rDiff = a.color.r - b.color.r;
+            if (rDiff !== 0) return rDiff;
+
+            // As a fallback, sort by Blue
+            return a.color.b - b.color.b;
           });
 
           // Add sorted albums to grid
