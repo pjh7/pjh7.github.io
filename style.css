@@ -76,6 +76,8 @@ ul.plain li { margin-bottom: 8px; }
 .timeline { list-style: none; margin: 0; padding: 0; }
 .timeline li { display: grid; grid-template-columns: 150px 1fr; gap: 16px; margin-bottom: 12px; }
 .timeline .date { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timeline .meta span { display: block; }
+.timeline .loc { color: var(--muted); font-size: 14px; }
 .timeline em { display: block; color: var(--muted); font-size: 15px; }
 
 /* publications */
@@ -148,4 +150,6 @@ footer { color: var(--muted); font-size: 14px; padding: 48px 0 32px; }
   .timeline li { margin-bottom: 14px; }
   .skills dd { margin-bottom: 10px; }
   .timeline .date { font-size: 14px; }
+  .timeline .meta span { display: inline; }
+  .timeline .loc::before { content: " · "; }
 }
